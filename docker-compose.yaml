@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+    mysql:
+        image: mysql:5.7
+        volumes:
+            - ./dbdata:/var/lib/mysql
+            - ./mysql:/docker-entrypoint-initdb.d
+        environment: 
+            - MYSQL_ROOT_PASSWORD=root
+        networks: 
+            - mysql-node-net
+
+    node:
+        build: ./node
+        entrypoint: dockerize -wait tcp://mysql:3306 -timeout 20s docker-entrypoint.sh index.js
+        ports: 
+            - 3000:3000
+        depends_on: 
+            - mysql
+        networks: 
+            - mysql-node-net
+            - node-nginx-net
+
+    nginx:
+        build: ./nginx
+        ports: 
+            - 8080:80
+        depends_on: 
+            - node
+        restart: always
+        networks: 
+            - node-nginx-net
+
+networks: 
+    mysql-node-net:
+        driver: bridge
+    node-nginx-net:
+        driver: bridge
