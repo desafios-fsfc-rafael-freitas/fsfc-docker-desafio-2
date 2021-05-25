@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY . .
 
-RUN npm index
+RUN npm install
 
 RUN apt-get update && apt-get install -y wget
 
